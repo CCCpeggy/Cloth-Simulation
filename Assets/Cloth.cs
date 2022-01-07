@@ -8,7 +8,7 @@ namespace Partical
 {
     public class Cloth : MonoBehaviour
     {
-        public int numberOfParticleInOneSide = 2;
+        public int numberOfParticleInOneSide = 3;
         public int particleDistance = 5;
         private int nParticles;
         private int nSprings;
@@ -20,32 +20,96 @@ namespace Partical
         {
             Vector<double> pos = Utility.CreateVector3d();
             for (int i = 0; i < numberOfParticleInOneSide; i++) {
-                GameObject point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                point.name = String.Format("point{0}", i);
-                point.transform.parent = transform;
-                point.AddComponent<Rigidbody>();
-                ClothParticle particle = point.AddComponent<ClothParticle>();
-                particle.index = i;
-                particles.Add(particle);
-                pos.CopyTo(particle.x);
-                pos[0] += particleDistance;
-                pos[1] = 5;
-                nParticles++;
+                pos[0] = 0;
+                for (int j = 0; j < numberOfParticleInOneSide; j++) {
+                    GameObject point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    point.name = String.Format("point{0}", i);
+                    point.transform.parent = transform;
+                    // point.AddComponent<Rigidbody>();
+                    ClothParticle particle = point.AddComponent<ClothParticle>();
+                    particle.index = i;
+                    particles.Add(particle);
+                    pos.CopyTo(particle.x);
+                    pos[0] += particleDistance;
+                    nParticles++;
+                }
+                pos[1] += particleDistance;
             }
+            // 水平第一排固定
+            for (int i = 0; i < numberOfParticleInOneSide; i++) {
+                particles[i].IsPin = true;
+            }
+            // Structural 垂直
             for (int i = 0; i < numberOfParticleInOneSide - 1; i++) {
-                ClothSpring spring = particles[i].gameObject.AddComponent<ClothSpring>();
-                spring.Setup(particles[i], particles[i+1], particleDistance);
-                springs.Add(spring);
-                nSprings++;
+                for (int j = 0; j < numberOfParticleInOneSide; j++) {
+                    int index = i * numberOfParticleInOneSide + j;
+                    AddStructuralSpring(index, index + numberOfParticleInOneSide);
+                }
+            }
+            // Structural 水平
+            for (int i = 0; i < numberOfParticleInOneSide; i++) {
+                for (int j = 0; j < numberOfParticleInOneSide - 1; j++) {
+                    int index = i * numberOfParticleInOneSide + j;
+                    AddStructuralSpring(index, index + 1);
+                }
+            }
+            // Sheer
+            for (int i = 0; i < numberOfParticleInOneSide - 1; i++) {
+                for (int j = 0; j < numberOfParticleInOneSide - 1; j++) {
+                    int index = i * numberOfParticleInOneSide + j;
+                    AddSheerSpring(index, index + numberOfParticleInOneSide + 1);
+                    AddSheerSpring(index + numberOfParticleInOneSide, index + 1);
+                }
+            }
+            // Flexion 垂直
+            for (int i = 0; i < numberOfParticleInOneSide - 2; i++) {
+                for (int j = 0; j < numberOfParticleInOneSide; j++) {
+                    int index = i * numberOfParticleInOneSide + j;
+                    AddFlexionSpring(index, index + numberOfParticleInOneSide * 2);
+                }
+            }
+            // Flexion 水平
+            for (int i = 0; i < numberOfParticleInOneSide; i++) {
+                for (int j = 0; j < numberOfParticleInOneSide - 2; j++) {
+                    int index = i * numberOfParticleInOneSide + j;
+                    AddFlexionSpring(index, index + 2);
+                }
             }
             InitDvVariable();
+        }
+
+        void AddStructuralSpring(int i, int j) {
+            ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
+            spring.transform.parent = particles[i].transform;
+            spring.Setup(particles[i], particles[j], particleDistance);
+            spring.ks = 15;
+            spring.kd = 2;
+            springs.Add(spring);
+            nSprings++;
+        }
+        void AddSheerSpring(int i, int j) {
+            ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
+            spring.transform.parent = particles[i].transform;
+            spring.Setup(particles[i], particles[j], particleDistance);
+            spring.ks = 5;
+            spring.kd = 1;
+            springs.Add(spring);
+            nSprings++;
+        }
+        void AddFlexionSpring(int i, int j) {
+            ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
+            spring.transform.parent = particles[i].transform;
+            spring.Setup(particles[i], particles[j], particleDistance);
+            spring.ks = 10;
+            spring.kd = 2;
+            springs.Add(spring);
+            nSprings++;
         }
 
         void Update()
         {
             for (int i = 0; i < nParticles; i++) {
-                // particles[i].F = particles[i].m * Utility.CreateVector3d(0, -9.8, 0);
-                particles[i].F.Clear();
+                particles[i].F = particles[i].m * g;
             }
             for (int i = 0; i < nSprings; i++) {
                 ClothParticle pi = springs[i].p1;
@@ -58,19 +122,31 @@ namespace Partical
                 pi.F += -fij - dij;
                 pj.F += fij + dij;
             }
-            // particles[0].F.Clear();
+            // 清除鎖定位置的力
+            for (int i = 0; i < nParticles; i++) {
+                if (particles[i].IsPin) {
+                    particles[i].F.Clear();
+                    // particles[i].v.Clear();
+                }
+            }
             double dt = Time.deltaTime;
             ComputeJacobians();
             UpdateDv(dt);
+            // 清除鎖定位置的速度
+            for (int i = 0; i < nParticles; i++) {
+                if (particles[i].IsPin)
+                    particles[i].v.Clear();
+            }
+            // 計算位移
             for (int i = 0; i < nParticles; i++) {
                 particles[i].x += particles[i].v * dt;
             }
-            for (int i = 0; i < nSprings; i++) {
-                ClothParticle pi = springs[i].p1;
-                ClothParticle pj = springs[i].p2;
-                Vector<double> xij = pi.x - pj.x;
-                Debug.Log(String.Format("更新完長度: {0}", xij.L2Norm()));
-            }
+            // for (int i = 0; i < nSprings; i++) {
+            //     ClothParticle pi = springs[i].p1;
+            //     ClothParticle pj = springs[i].p2;
+            //     Vector<double> xij = pi.x - pj.x;
+            //     Debug.Log(String.Format("更新完長度: {0}", xij.L2Norm()));
+            // }
         }
 
         private Vector<double> dv;          // null vector is a good choice for initial guess
@@ -79,6 +155,7 @@ namespace Partical
         Matrix<double> dfDx;
         Vector<double> f0;
         Vector<double> dfDxMultiplyV;
+        Vector<double> g;
         
         private void InitDvVariable() {
             dv = Utility.CreateVectord3n(nParticles);
@@ -88,6 +165,7 @@ namespace Partical
             dfDx = Utility.CreateMatrixd3nx3n(nParticles, false);
             f0 = Utility.CreateVectord3n(nParticles);
             dfDxMultiplyV = Utility.CreateVectord3n(nParticles);
+            g = Utility.CreateVector3d(0, -9.8, 0);
         }
         private void UpdateDv(double dt) {
             dv.Clear();
