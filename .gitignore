@@ -18,10 +18,8 @@
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Aa]ssets/**/*.meta
 
-Assets/EasyMotionRecorder/
-Assets/EasyMotionRecorder.meta
-Assets/ThreeDPoseUnityBarracuda/
-Assets/ThreeDPoseUnityBarracuda.meta
+Assets/NuGet*
+Assets/Packages/
 
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # /[Aa]ssets/AssetStoreTools*

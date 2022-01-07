@@ -1,18 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MathNet.Numerics.LinearAlgebra;
 
-public class ClothParticle : MonoBehaviour
+namespace Partical
 {
-    // Start is called before the first frame update
-    void Start()
+    public class ClothParticle : MonoBehaviour
     {
-        
-    }
+        public Vector<double> x = Utility.CreateVector3d();  // position
+        public Vector<double> v = Utility.CreateVector3d();  // velocity
+        public Vector<double> F = Utility.CreateVector3d();  // force
+        public double m = 1;   // the mass
+                           // Start is called before the first frame update
+        public int index;
+        void Start()
+        {
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        // Update is called once per frame
+        void Update()
+        {
+            transform.position = new Vector3((float)x[0], (float)x[1], (float)x[2]);
+        }
     }
 }
