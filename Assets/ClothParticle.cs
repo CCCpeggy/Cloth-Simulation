@@ -13,6 +13,7 @@ namespace Partical
         public double m = 1;   // the mass
                            // Start is called before the first frame update
         public int index;
+        public bool isPin = false;
         void Start()
         {
         }
