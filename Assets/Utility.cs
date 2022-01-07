@@ -7,14 +7,14 @@ namespace Partical
 {
     public class Utility
     {
-        public static Vector<double> CreateVector3d(double n1=0, double n2=0, double n3=0)
+        public static Vector<double> CreateVector3d(double n1 = 0, double n2 = 0, double n3 = 0)
         {
             return Vector<double>.Build.Dense(new[] { n1, n2, n3 });
         }
         public static Matrix<double> CreateMatrix3x3(
-            double n11=0, double n12=0, double n13=0,
-            double n21=0, double n22=0, double n23=0,
-            double n31=0, double n32=0, double n33=0)
+            double n11 = 0, double n12 = 0, double n13 = 0,
+            double n21 = 0, double n22 = 0, double n23 = 0,
+            double n31 = 0, double n32 = 0, double n33 = 0)
         {
             return Matrix<double>.Build.Dense(3, 3, new[] { n11, n12, n13, n21, n22, n23, n31, n32, n33 });
         }
@@ -30,16 +30,29 @@ namespace Partical
         }
         public static Matrix<double> OuterProduct(Vector<double> v, Vector<double> u)
         {
-
-            return Matrix<double>.Build.Dense(3, 3, new[] {
-                v[0] * u[0], v[0] * u[1], v[0] * u[2],
-                v[1] * u[0], v[1] * u[1], v[1] * u[2],
-                v[2] * u[0], v[2] * u[1], v[2] * u[2]}
-            );
+            double[] result = new double[v.Count * u.Count];
+            for (int i = 0; i < v.Count; i++)
+            {
+                for (int j = 0; j < u.Count; j++)
+                {
+                    result[i * v.Count + j] = v[i] * u[j];
+                }
+            }
+            return Matrix<double>.Build.Dense(v.Count, u.Count, result);
         }
         public static double InnerProduct(Vector<double> v, Vector<double> u)
         {
-            return v[0] * u[0] + v[1] * u[1] + v[2] * u[2];
+            if (!Utility.Is2VectorSameSize(v, u)) Debug.LogError("u 跟 v 大小不同");
+            double sum = 0;
+            for (int i = 0; i < v.Count; i++)
+            {
+                sum += v[i] * u[i];
+            }
+            return sum;
+        }
+        public static bool Is2VectorSameSize(Vector<double> v, Vector<double> u)
+        {
+            return v.Count == u.Count;
         }
         public static Matrix<double> GetIdentity()
         {
