@@ -32,7 +32,7 @@ namespace Partical
                 pos[1] = 5;
                 nParticles++;
             }
-            particles[0].isPin = true;
+            particles[0].IsPin = true;
             for (int i = 0; i < numberOfParticleInOneSide - 1; i++) {
                 ClothSpring spring = particles[i].gameObject.AddComponent<ClothSpring>();
                 spring.Setup(particles[i], particles[i+1], particleDistance);
