@@ -82,7 +82,7 @@ namespace Partical
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
             spring.Setup(particles[i], particles[j], particleDistance);
-            spring.ks = 15;
+            spring.ks = 20;
             spring.kd = 2;
             springs.Add(spring);
             nSprings++;
@@ -91,7 +91,7 @@ namespace Partical
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
             spring.Setup(particles[i], particles[j], particleDistance);
-            spring.ks = 5;
+            spring.ks = 10;
             spring.kd = 1;
             springs.Add(spring);
             nSprings++;
