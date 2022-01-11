@@ -8,8 +8,8 @@ namespace Partical
 {
     public class Cloth : MonoBehaviour
     {
-        public int numberOfParticleInOneSide = 3;
-        public float particleDistance = 0.5f;
+        public int numberOfParticleInOneSide = 10;
+        public float particleDistance = 2;
         public int nParticles;
         public int nSprings;
         public List<ClothParticle> particles = new List<ClothParticle>();
@@ -76,6 +76,24 @@ namespace Partical
                     AddFlexionSpring(index, index + 2);
                 }
             }
+        }
+        void Update() {
+            
+            // 清除鎖定位置的速度
+            for (int i = 0; i < nParticles; i++) {
+                if (particles[i].IsPin)
+                    particles[i].v.Clear();
+            }
+            // 計算位移
+            for (int i = 0; i < nParticles; i++) {
+                particles[i].x += particles[i].v * Time.deltaTime;
+            }
+            // for (int i = 0; i < cloth.nSprings; i++) {
+            //     ClothParticle pi = cloth.springs[i].p1;
+            //     ClothParticle pj = cloth.springs[i].p2;
+            //     Vector<double> xij = pi.x - pj.x;
+            //     Debug.Log(String.Format("更新完長度: {0}", xij.L2Norm()));
+            // }
         }
 
         void AddStructuralSpring(int i, int j) {

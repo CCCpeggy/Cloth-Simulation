@@ -20,8 +20,6 @@ namespace Partical {
         void Start()
         {
             cloth = gameObject.AddComponent<Cloth>();
-            cloth.numberOfParticleInOneSide = 10;
-            cloth.particleDistance = 2;
         }
 
 
@@ -53,34 +51,13 @@ namespace Partical {
                 }
             }
             double dt = Time.deltaTime;
-            // for (int i = 0; i < cloth.nParticles; i++) {
-            //     if (cloth.particles[i].IsPin){
-            //         cloth.particles[i].v.Clear();
-            //         cloth.particles[i].F.Clear();
-            //     }
-            // }
             ComputeJacobians();
             UpdateDv(dt);
-            // 清除鎖定位置的速度
-            for (int i = 0; i < cloth.nParticles; i++) {
-                if (cloth.particles[i].IsPin)
-                    cloth.particles[i].v.Clear();
-            }
             // for (int i = 0; i < cloth.nParticles; i++) {
             //     if (cloth.particles[i].v.L2Norm() > 100) {
             //         cloth.particles[i].v /= cloth.particles[i].v.L2Norm();
             //         cloth.particles[i].v *= 100;
             //     }
-            // }
-            // 計算位移
-            for (int i = 0; i < cloth.nParticles; i++) {
-                cloth.particles[i].x += cloth.particles[i].v * dt;
-            }
-            // for (int i = 0; i < cloth.nSprings; i++) {
-            //     ClothParticle pi = cloth.springs[i].p1;
-            //     ClothParticle pj = cloth.springs[i].p2;
-            //     Vector<double> xij = pi.x - pj.x;
-            //     Debug.Log(String.Format("更新完長度: {0}", xij.L2Norm()));
             // }
         }
         private void InitDvVariable() {
