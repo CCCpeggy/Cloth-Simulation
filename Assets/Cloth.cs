@@ -100,16 +100,17 @@ namespace Partical
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
             spring.Setup(particles[i], particles[j], particleDistance);
-            spring.ks = 20;
+            spring.ks = 25;
             spring.kd = 1;
             springs.Add(spring);
             nSprings++;
         }
+        double sqrt = Math.Sqrt(2);
         void AddSheerSpring(int i, int j) {
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
-            spring.Setup(particles[i], particles[j], particleDistance);
-            spring.ks = 10;
+            spring.Setup(particles[i], particles[j], particleDistance * sqrt);
+            spring.ks = 25;
             spring.kd = 1;
             springs.Add(spring);
             nSprings++;
@@ -117,7 +118,7 @@ namespace Partical
         void AddFlexionSpring(int i, int j) {
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
-            spring.Setup(particles[i], particles[j], particleDistance);
+            spring.Setup(particles[i], particles[j], particleDistance * 2);
             spring.ks = 10;
             spring.kd = 1;
             springs.Add(spring);
