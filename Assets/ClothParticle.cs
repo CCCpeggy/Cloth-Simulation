@@ -12,7 +12,6 @@ namespace Partical
         public Vector<double> v = Utility.CreateVector3d();  // velocity
         public Vector<double> F = Utility.CreateVector3d();  // force
         public double m = 1;   // the mass
-                           // Start is called before the first frame update
         public int index;
         bool isPin = false;
         public bool IsPin {
