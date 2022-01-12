@@ -16,7 +16,7 @@ namespace Partical {
         private Matrix<double> dfDx;
         private Vector<double> f0;
         private Vector<double> dfDxMultiplyV;
-        private Vector<double> g;
+        private Vector<double> g = Utility.CreateVector3d(0, -9.8, 0);
         void Start()
         {
             cloth = gameObject.AddComponent<Cloth>();
@@ -68,7 +68,6 @@ namespace Partical {
             dfDx = Utility.CreateMatrixd3nx3n(cloth.nParticles, false);
             f0 = Utility.CreateVectord3n(cloth.nParticles);
             dfDxMultiplyV = Utility.CreateVectord3n(cloth.nParticles);
-            g = Utility.CreateVector3d(0, -9.8, 0);
         }
         private void UpdateDv(double dt) {
             dv.Clear();

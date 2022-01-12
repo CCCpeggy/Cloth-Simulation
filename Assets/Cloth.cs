@@ -11,6 +11,7 @@ namespace Partical
         public int numberOfParticleInOneSide = 10;
         public float particleDistance = 2;
         public int nParticles;
+        public double speed = 1;
         public int nSprings;
         public List<ClothParticle> particles = new List<ClothParticle>();
         public List<ClothSpring> springs = new List<ClothSpring>();
@@ -25,7 +26,7 @@ namespace Partical
                     point.transform.parent = transform;
                     // point.AddComponent<Rigidbody>();
                     ClothParticle particle = point.AddComponent<ClothParticle>();
-                    particle.index = i;
+                    particle.index = i * numberOfParticleInOneSide + j;
                     particles.Add(particle);
                     pos.CopyTo(particle.x);
                     pos[0] += particleDistance;
@@ -77,8 +78,8 @@ namespace Partical
                 }
             }
         }
-        void Update() {
-            
+        public void Update() {
+            double dt = Time.deltaTime * speed;
             // 清除鎖定位置的速度
             for (int i = 0; i < nParticles; i++) {
                 if (particles[i].IsPin)
@@ -86,7 +87,7 @@ namespace Partical
             }
             // 計算位移
             for (int i = 0; i < nParticles; i++) {
-                particles[i].x += particles[i].v * Time.deltaTime;
+                particles[i].x += particles[i].v * dt;
             }
             // for (int i = 0; i < cloth.nSprings; i++) {
             //     ClothParticle pi = cloth.springs[i].p1;

@@ -29,7 +29,7 @@ namespace Partical
 
 
         // Update is called once per frame
-        void Update()
+        public void Update()
         {
             if (Selection.Contains(gameObject)) {
                 x[0] = transform.position.x; x[1] = transform.position.y; x[2] = transform.position.z;
