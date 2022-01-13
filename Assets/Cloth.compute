@@ -9,6 +9,7 @@ RWStructuredBuffer<uint> pin;
 RWStructuredBuffer<float3> x;
 RWStructuredBuffer<float3> v;
 RWStructuredBuffer<float3> f;
+RWStructuredBuffer<float3> color;
 uint nParticals;
 
 struct Spring
@@ -78,20 +79,26 @@ void UpdateForce (uint3 id : SV_DispatchThreadID) {
 void UpdatePosition (uint3 id : SV_DispatchThreadID) {
     float3 g = float3(0, -9.81, 0);
     if (id.x < nParticals && pin[id.x] == 0) {
+        Ray r;
+        r.origin = x[id.x];
         float3 oldX = x[id.x];
         float3 a = g + f[id.x] / 1;
         v[id.x] += a * dt;
         x[id.x] += v[id.x] * dt;
 
-        Ray r;
-        r.origin = oldX;
-        r.direction = (x[id.x] - oldX);
+        r.direction = (v[id.x] * dt) * 0.05;
 
-        BoxCollider box={float3(8.4, -25.0, 1.7),float3(10.0, 10.0, 10.0)};
-        // Hit h = RayBoxCollision(r, box, 0.05);
-        // if (h.collision) {
-        //     x[id.x] = h.hitPoint;
-        //     v[id.x] = saturate(cor) * Reflect(v[id.x], h.hitNormal);
-        // }
+        SphereCollider sphere;
+        sphere.center = float3(8.4, -15, 5);
+        sphere.radius = 20.0;
+        Hit h = RaySphereCollision(r, sphere);
+        color[id.x] = color[id.x] * 0.999;
+        if (h.collision) {
+            x[id.x] = h.hitPoint;
+            v[id.x] = 1 * Reflect(v[id.x], h.hitNormal);
+            // x[id.x] = 0;
+            // v[id.x] = 0;
+            color[id.x] = float3(1, 1, 1);
+        }
     }
 }

@@ -34,14 +34,22 @@ struct Hit {
 // UTILITY METHODS
 //
 
-float3 NearestPointOnRay(Ray r, float3 p) {
+float3 HitPoint(Ray r, SphereCollider s) {
 	// If the ray is sufficiently short, just return the midpoint.
 	if (length(r.direction) < EPSILON) {
 		return r.origin +r.direction/2.0;
 	}
+	float3 P = r.origin;
+	float3 C = s.center;
+	float R = s.radius;
+	float3 d = r.direction;
 
-	float t = dot(p - r.origin, r.direction)/dot(r.direction, r.direction);
+	float a = dot(d, (P - C));
+	float b = a * a - dot(P - C, P - C) + R * R;
+	if(b < 0) return float3 (0, 0, 0);
+	float t = (-a - sqrt(b)) / length(r.direction) / length(r.direction) ;
 	return r.origin + t*normalize(r.direction);
+	// return r.origin + (dot(p - r.origin, r.direction) / length(r.direction));
 }
 
 float3 Reflect(float3 original, float3 normal) {
@@ -55,22 +63,50 @@ float3 Reflect(float3 original, float3 normal) {
 //
 
 /* Ray Sphere Intersection. */
-Hit RaySphereCollision(Ray r, SphereCollider s, float padding) {
+Hit RaySphereCollision(Ray r, SphereCollider s) {
 	Hit h;
 	h.collision = false;
 	h.hitPoint = float3(0,0,0);
 	h.hitNormal = float3(0,1,0);
 
-	// Get the nearest point along the line to the sphere center.
-	float3 nearestPoint = NearestPointOnRay(r, s.center);
+	float3 P = r.origin;
+	float3 C = s.center;
+	float R = s.radius;
+	float3 d = r.direction;
+	float dLength = length(d);
 
-	/* If the nearest point on the ray is less than the radius of the sphere,
-	then the ray must have passed through the sphere. */
-	if (length(nearestPoint - s.center) <= s.radius+padding) {
-		h.collision = true;
-		h.hitNormal = normalize(nearestPoint - s.center);
-		h.hitPoint = nearestPoint + h.hitNormal*EPSILON;
+	float3 oc = s.center - r.origin;
+    float projoc = dot(r.direction, oc);
+
+    if (projoc < 0)
+        return h;
+
+    float oc2 = dot(oc, oc);
+    float distance2 = oc2 - projoc * projoc;
+
+    if (distance2 > s.radius)
+        return h;
+
+    float discriminant = s.radius - distance2;
+	discriminant = sqrt(discriminant);
+	float t0 = projoc - discriminant;
+	float t1 = projoc + discriminant;
+	float t;
+	if (t0 >= 0 && t0 <= 1) {
+		t = t0;
 	}
+	else if (t1 >= 0 && t1 <= 1) {
+		t = t1;
+	}
+	else {
+		return h;
+	}
+	float3 hitPoint = P + t * d;
+
+	
+	h.collision = true;
+	h.hitNormal = normalize(hitPoint - C);
+	h.hitPoint = hitPoint + h.hitNormal * 0.01;
 
 	return h;
 }
@@ -79,6 +115,6 @@ Hit RayBoxCollision(Ray r, BoxCollider b) {
 	Hit h;
 	h.collision = false;
 	h.hitPoint = float3(0, 0, 0);
-	h.hitNormal = h.hitPoint;
+	h.hitNormal = h.hitPoint * h.hitNormal;
 	return h;
 }

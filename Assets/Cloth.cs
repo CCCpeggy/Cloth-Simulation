@@ -22,9 +22,9 @@ namespace Partical
                 pos[0] = 0;
                 for (int j = 0; j < numberOfParticleInOneSide; j++) {
                     GameObject point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    // GameObject point = new GameObject();
                     point.name = String.Format("point{0}", i);
                     point.transform.parent = transform;
-                    // point.AddComponent<Rigidbody>();
                     ClothParticle particle = point.AddComponent<ClothParticle>();
                     particle.index = i * numberOfParticleInOneSide + j;
                     particles.Add(particle);
@@ -32,7 +32,8 @@ namespace Partical
                     pos[0] += particleDistance;
                     nParticles++;
                 }
-                pos[1] -= particleDistance;
+                pos[1] += particleDistance;
+                pos[2] += particleDistance * 0.05;
             }
             // 水平第一排固定
             // for (int i = 0; i < numberOfParticleInOneSide; i++) {
@@ -101,7 +102,7 @@ namespace Partical
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
             spring.Setup(particles[i], particles[j], particleDistance);
-            spring.ks = 10;
+            spring.ks = 100;
             spring.kd = 1;
             springs.Add(spring);
             nSprings++;
@@ -111,7 +112,7 @@ namespace Partical
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
             spring.Setup(particles[i], particles[j], particleDistance * sqrt);
-            spring.ks = 10;
+            spring.ks = 100;
             spring.kd = 1;
             springs.Add(spring);
             nSprings++;
@@ -120,7 +121,7 @@ namespace Partical
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
             spring.Setup(particles[i], particles[j], particleDistance * 2);
-            spring.ks = 10;
+            spring.ks = 100;
             spring.kd = 1;
             springs.Add(spring);
             nSprings++;

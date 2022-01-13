@@ -16,11 +16,13 @@ namespace Partical
         public ComputeShader clothShader;
         private Cloth cloth;
         private ComputeBuffer xBuffer, vBuffer, fBuffer, pinBuffer, springBuffer;
+        private ComputeBuffer colorBuffer;
         ComputeSpring[] computeSpring;
         int[] pin;
-        Vector3[] x, v, f;
+        Vector3[] x, v, f, color;
         int forceKernel;
         int positionKernel;
+        public Shader shader;
         void Start()
         {
             cloth = gameObject.AddComponent<Cloth>();
@@ -30,10 +32,14 @@ namespace Partical
         {
             if (x == null) {
                 Init();
+                for (int i = 0; i < cloth.nParticles; i++)
+                {
+                    cloth.particles[i].gameObject.GetComponent<MeshRenderer>().material = new Material( shader );
+                }
             }
             UpdateDt(Time.deltaTime);
             // for (int i = 0; i < 4; i++) {
-                // UpdateDt(Time.deltaTime/4);
+            //     UpdateDt(Time.deltaTime/4);
             // }
             // for (int i = 0; i < cloth.nParticles; i++) {
             //     RaycastHit hit; 
@@ -53,18 +59,20 @@ namespace Partical
         }
 
         void UpdateDt(float dt) {
-            x = cloth.particles.Select(x => Utility.ConvertToVector3(x.x)).ToArray();
-            xBuffer.SetData(x);
-            v = cloth.particles.Select(x => Utility.ConvertToVector3(x.v)).ToArray();
-            vBuffer.SetData(v);
+            // x = cloth.particles.Select(x => Utility.ConvertToVector3(x.x)).ToArray();
+            // xBuffer.SetData(x);
+            // v = cloth.particles.Select(x => Utility.ConvertToVector3(x.v)).ToArray();
+            // vBuffer.SetData(v);
             // Euler
             clothShader.SetFloat("dt", dt);
             clothShader.Dispatch(forceKernel, cloth.nParticles / 256 + 1, 1, 1);
             clothShader.Dispatch(positionKernel, cloth.nParticles / 256 + 1, 1, 1);
             xBuffer.GetData(x);
+            colorBuffer.GetData(color);
             for (int i = 0; i < cloth.nParticles; i++)
             {
                 Utility.CreateVector3d(x[i].x, x[i].y, x[i].z).CopyTo(cloth.particles[i].x);
+                cloth.particles[i].gameObject.GetComponent<MeshRenderer>().material.color = new Color(color[i][0], color[i][1], color[i][2]);
             }
 
             // Vector3[] tmpX = new Vector3[cloth.nParticles];
@@ -111,6 +119,7 @@ namespace Partical
             x = cloth.particles.Select(x => Utility.ConvertToVector3(x.x)).ToArray();
             v = cloth.particles.Select(x => Utility.ConvertToVector3(x.v)).ToArray();
             f = new Vector3[cloth.nParticles];
+            color = new Vector3[cloth.nParticles];
 
             computeSpring = new ComputeSpring[cloth.nParticles * cloth.nParticles];
             for (int i = 0; i < cloth.nSprings; i++)
@@ -127,12 +136,14 @@ namespace Partical
 
             int count = cloth.nParticles;
             xBuffer = new ComputeBuffer(count, 12);
+            colorBuffer = new ComputeBuffer(count, 12);
             vBuffer = new ComputeBuffer(count, 12);
             fBuffer = new ComputeBuffer(count, 12);
             pinBuffer = new ComputeBuffer(count, 4);
             springBuffer  = new ComputeBuffer(count * count, 12);
             
             xBuffer.SetData(x);
+            colorBuffer.SetData(color);
             vBuffer.SetData(v);
             fBuffer.SetData(f);
             pinBuffer.SetData(pin);
@@ -147,6 +158,7 @@ namespace Partical
 
             clothShader.SetBuffer(positionKernel, "pin", pinBuffer);
             clothShader.SetBuffer(positionKernel, "x", xBuffer);
+            clothShader.SetBuffer(positionKernel, "color", colorBuffer);
             clothShader.SetBuffer(positionKernel, "v", vBuffer);
             clothShader.SetBuffer(positionKernel, "f", fBuffer);
 
@@ -154,5 +166,30 @@ namespace Partical
             clothShader.SetInt("nParticals", cloth.nParticles);
             clothShader.SetInt("nSprings", cloth.nSprings);
         }
+        void OnDestroy() {
+            if (xBuffer != null) {
+                xBuffer.Release();
+            }
+            if (colorBuffer != null) {
+                colorBuffer.Release();
+            }
+
+            if (vBuffer != null) {
+                vBuffer.Release();
+            }
+
+            if (fBuffer != null) {
+                fBuffer.Release();
+            }
+
+            if (pinBuffer != null) {
+                pinBuffer.Release();
+            }
+
+            if (springBuffer != null) {
+                springBuffer.Release();
+            }
+        }
     }
+
 }
