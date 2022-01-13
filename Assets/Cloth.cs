@@ -81,14 +81,14 @@ namespace Partical
         public void Update() {
             double dt = Time.deltaTime * speed;
             // 清除鎖定位置的速度
-            for (int i = 0; i < nParticles; i++) {
-                if (particles[i].IsPin)
-                    particles[i].v.Clear();
-            }
+            // for (int i = 0; i < nParticles; i++) {
+            //     if (particles[i].IsPin)
+            //         particles[i].v.Clear();
+            // }
             // 計算位移
-            for (int i = 0; i < nParticles; i++) {
-                particles[i].x += particles[i].v * dt;
-            }
+            // for (int i = 0; i < nParticles; i++) {
+            //     particles[i].x += particles[i].v * dt;
+            // }
             // for (int i = 0; i < cloth.nSprings; i++) {
             //     ClothParticle pi = cloth.springs[i].p1;
             //     ClothParticle pj = cloth.springs[i].p2;
@@ -101,7 +101,7 @@ namespace Partical
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
             spring.Setup(particles[i], particles[j], particleDistance);
-            spring.ks = 25;
+            spring.ks = 10;
             spring.kd = 1;
             springs.Add(spring);
             nSprings++;
@@ -111,7 +111,7 @@ namespace Partical
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
             spring.Setup(particles[i], particles[j], particleDistance * sqrt);
-            spring.ks = 25;
+            spring.ks = 10;
             spring.kd = 1;
             springs.Add(spring);
             nSprings++;

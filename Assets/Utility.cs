@@ -86,6 +86,10 @@ namespace Partical
         {
             return CreateVector3d(v[i * 3 + 0], v[i * 3 + 1], v[i * 3 + 2]);
         }
+        public static Vector3 ConvertToVector3(Vector<double> v)
+        {
+            return new Vector3((float)v[0], (float)v[1], (float)v[2]);
+        }
         // public static void CopyValue(Vector<double> f, Vector<double> d)
         // {
         //     if (f.Count != d.Count) {

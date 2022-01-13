@@ -17,6 +17,7 @@ namespace Partical
         public bool IsPin {
             set{
                 isPin=value;
+                statusPin=value;
             }
             get{
                 return statusPin;

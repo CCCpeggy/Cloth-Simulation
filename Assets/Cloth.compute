@@ -1,0 +1,97 @@
+#include "GPUCollision.cginc"
+#pragma kernel UpdateForce
+#pragma kernel UpdatePosition
+
+// uint dim;
+float dt;
+
+RWStructuredBuffer<uint> pin;
+RWStructuredBuffer<float3> x;
+RWStructuredBuffer<float3> v;
+RWStructuredBuffer<float3> f;
+uint nParticals;
+
+struct Spring
+{
+    float kd;
+    float ks;
+    float r;
+};
+RWStructuredBuffer<Spring> springs; // nParticals x nParticals
+uint nSprings;
+
+// FUNCTION
+
+// int2 To2D(uint id) {
+// 	return int2(id % dim, id / dim);
+// }
+
+// uint To1D(int2 id) {
+// 	return (uint)(id.y * dim + id.x);
+// }
+
+
+/* Gets the force on node A by the spring AB. */
+float3 GetSpringForce(uint a, uint b) {
+    float ks = springs[a * nParticals + b].ks;
+    float kd = springs[a * nParticals + b].kd;
+    float r = springs[a * nParticals + b].r;
+
+	float3 xi = x[a];
+	float3 xj = x[b];
+	float3 xij = xi - xj;
+
+	float3 vi = v[a];
+	float3 vj = v[b];
+
+	if (length(xi - xj) < 0.00001) {
+		return float3(0,0,0);
+	}
+	float3 springForce = ks * (1 - r / length(xij)) * xij;
+	float3 dampingForce = kd * (vi - vj);
+    return springForce + dampingForce;
+
+	// float3 dir = normalize(xj - xi);
+
+	// float springForce = -ks * (length(xj - xi) - r);
+	// float dampingForce = -kd * (dot(vj, dir) - dot(vi, dir));
+
+	// return (springForce + dampingForce) * dir;
+}
+
+
+// KERNEL
+
+[numthreads(256, 1, 1)]
+void UpdateForce (uint3 id : SV_DispatchThreadID) {
+    if (id.x < nParticals) {
+        f[id.x] = 0;
+        for (uint i = 0; i < nParticals; i++) {
+            if (springs[id.x * nParticals + i].r > 0) {
+                f[id.x] -= GetSpringForce(id.x, i);
+            } 
+        }
+    }
+}
+
+[numthreads(256, 1, 1)]
+void UpdatePosition (uint3 id : SV_DispatchThreadID) {
+    float3 g = float3(0, -9.81, 0);
+    if (id.x < nParticals && pin[id.x] == 0) {
+        float3 oldX = x[id.x];
+        float3 a = g + f[id.x] / 1;
+        v[id.x] += a * dt;
+        x[id.x] += v[id.x] * dt;
+
+        Ray r;
+        r.origin = oldX;
+        r.direction = (x[id.x] - oldX);
+
+        BoxCollider box={float3(8.4, -25.0, 1.7),float3(10.0, 10.0, 10.0)};
+        // Hit h = RayBoxCollision(r, box, 0.05);
+        // if (h.collision) {
+        //     x[id.x] = h.hitPoint;
+        //     v[id.x] = saturate(cor) * Reflect(v[id.x], h.hitNormal);
+        // }
+    }
+}
