@@ -3,26 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+
 namespace Partical
 {
+    // 包裝彈簧傳進 Compute Shader
     struct ComputeSpring
     {
         public float kd;
         public float ks;
         public float r;
     };
+    // 將 Explicit Euler 的內容移植到 GPU 做計算，另外也計算了 Collision
     public class ExplicitEulerGPU : MonoBehaviour
     {
-        public ComputeShader clothShader;
+        public ComputeShader clothShader;   // 計算的 shader
         private Cloth cloth;
-        private ComputeBuffer xBuffer, vBuffer, fBuffer, pinBuffer, springBuffer;
-        private ComputeBuffer colorBuffer;
-        ComputeSpring[] computeSpring;
-        int[] pin;
-        Vector3[] x, v, f, color;
-        int forceKernel;
-        int positionKernel;
-        public Shader shader;
+        private ComputeBuffer xBuffer, vBuffer, fBuffer, pinBuffer, springBuffer, colorBuffer;  // GPU data buffer
+        ComputeSpring[] computeSpring;      // 彈簧
+        int[] pin;                          // 位置是否固定
+        Vector3[] x, v, f, color;           // 位置, 速度, 力, 顏色
+        int forceKernel;                    // compute shader 的 kernel 編號
+        int positionKernel;                 // compute shader 的 kernel 編號
         void Start()
         {
             cloth = gameObject.AddComponent<Cloth>();
@@ -31,31 +32,9 @@ namespace Partical
         void Update()
         {
             if (x == null) {
-                Init();
-                for (int i = 0; i < cloth.nParticles; i++)
-                {
-                    cloth.particles[i].gameObject.GetComponent<MeshRenderer>().material = new Material( shader );
-                }
+                InitComputeShaderData();
             }
             UpdateDt(Time.deltaTime);
-            // for (int i = 0; i < 4; i++) {
-            //     UpdateDt(Time.deltaTime/4);
-            // }
-            // for (int i = 0; i < cloth.nParticles; i++) {
-            //     RaycastHit hit; 
-            //     ClothParticle clothPartical = cloth.particles[i];
-            //     Vector3 x = Utility.ConvertToVector3(cloth.particles[i].x);
-            //     if (Physics.Raycast(x, Vector3.down, out hit, 0.01f))
-            //     {
-            //         Vector3 v = Utility.ConvertToVector3(cloth.particles[i].v);
-            //         v = Vector3.Reflect(v, hit.normal);
-            //         Utility.CreateVector3d(v.x, v.y, v.z).CopyTo(cloth.particles[i].v);
-            //         x = hit.point;
-            //         Utility.CreateVector3d(x.x, x.y, x.z).CopyTo(cloth.particles[i].x);
-            //         // Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.forward) * hit.distance, Color.yellow);
-            //         Debug.Log("Did Hit");
-            //     }
-            // }
         }
 
         void UpdateDt(float dt) {
@@ -65,10 +44,14 @@ namespace Partical
             // vBuffer.SetData(v);
             // Euler
             clothShader.SetFloat("dt", dt);
+            // 計算力
             clothShader.Dispatch(forceKernel, cloth.nParticles / 256 + 1, 1, 1);
+            // 計算位移
             clothShader.Dispatch(positionKernel, cloth.nParticles / 256 + 1, 1, 1);
+            // 取得位置、顏色
             xBuffer.GetData(x);
             colorBuffer.GetData(color);
+            // 將位置與資料給到 Particle
             for (int i = 0; i < cloth.nParticles; i++)
             {
                 Utility.CreateVector3d(x[i].x, x[i].y, x[i].z).CopyTo(cloth.particles[i].x);
@@ -114,7 +97,8 @@ namespace Partical
             // }
         }
 
-        void Init() {
+        // 初始化 Compute Shader 的資料
+        void InitComputeShaderData() {
             pin = cloth.particles.Select(x => x.IsPin?1:0).ToArray();
             x = cloth.particles.Select(x => Utility.ConvertToVector3(x.x)).ToArray();
             v = cloth.particles.Select(x => Utility.ConvertToVector3(x.v)).ToArray();
@@ -166,6 +150,8 @@ namespace Partical
             clothShader.SetInt("nParticals", cloth.nParticles);
             clothShader.SetInt("nSprings", cloth.nSprings);
         }
+
+        // 釋放 Buffer 的資料
         void OnDestroy() {
             if (xBuffer != null) {
                 xBuffer.Release();

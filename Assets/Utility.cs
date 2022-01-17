@@ -11,6 +11,10 @@ namespace Partical
         {
             return Vector<double>.Build.Dense(new[] { n1, n2, n3 });
         }
+        public static Vector<double> CreateVector3d(Vector3 v)
+        {
+            return Vector<double>.Build.Dense(new double[] { v.x, v.y, v.z });
+        }
         public static Matrix<double> CreateMatrix3x3(
             double n11 = 0, double n12 = 0, double n13 = 0,
             double n21 = 0, double n22 = 0, double n23 = 0,
@@ -90,15 +94,5 @@ namespace Partical
         {
             return new Vector3((float)v[0], (float)v[1], (float)v[2]);
         }
-        // public static void CopyValue(Vector<double> f, Vector<double> d)
-        // {
-        //     if (f.Count != d.Count) {
-        //         Debug.LogError("目標 vector 與來源 vector 的長度不同");
-        //         return;
-        //     }
-        //     for (int i = 0; i < f.Count; i++) {
-        //         d[i] = f[i];
-        //     }
-        // }
     }
 }

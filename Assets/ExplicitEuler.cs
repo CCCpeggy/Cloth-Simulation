@@ -5,6 +5,9 @@ using MathNet.Numerics.LinearAlgebra;
 
 
 namespace Partical {
+    // 這是實作 Explicit Euler 的做法
+    // 彈簧特性可以參考這個影片：https://www.youtube.com/watch?v=kyQP4t_wOGI&t=531s&ab_channel=Gonkee
+    // 跟這個網站：https://www.khanacademy.org/computing/pixar/simulation/hair-simulation-101/v/sim2-fix
     public class ExplicitEuler : MonoBehaviour
     {
         private Cloth cloth;
@@ -14,27 +17,29 @@ namespace Partical {
         void Start()
         {
             cloth = gameObject.AddComponent<Cloth>();
-            cloth.speed = 0.25;
         }
 
         void Update()
         {
             if (f0 == null) {
+                // 初始化參數
                 f0 = Utility.CreateVectord3n(cloth.nParticles);
                 M = Utility.CreateMatrixd3nx3n(cloth.nParticles, true);
                 SetMassMatrix(M);
             }
-            double dt = Time.deltaTime * cloth.speed;
+            // 計算當下的力
+            double dt = Time.deltaTime;
             for (int i = 0; i < cloth.nParticles; i++) {
-                cloth.particles[i].F = cloth.particles[i].m * g;
-                // cloth.particles[i].F.Clear();
+                cloth.particles[i].F = g;
             }
             for (int i = 0; i < cloth.nSprings; i++) {
                 ClothParticle pi = cloth.springs[i].p1;
                 ClothParticle pj = cloth.springs[i].p2;
                 Vector<double> xij = pi.x - pj.x;
 
+                // damping: dij = (vij) * kd
                 Vector<double> dij = (pi.v - pj.v) * cloth.springs[i].kd;
+                // stiffness: (1 - L / |xij|) * xij * k
                 Vector<double> fij = (1 - cloth.springs[i].r / xij.L2Norm()) * xij * cloth.springs[i].ks;
                 pi.F += -fij - dij;
                 pj.F += fij + dij;
@@ -48,8 +53,15 @@ namespace Partical {
             }
             SetFroce0(f0);
             Vector<double> dv = M.Inverse() * f0 * dt;
+            // 更新速度及位置
             for (int i = 0; i < cloth.nParticles; i++) {
-                cloth.particles[i].v += Utility.GetVector3FromVector(dv, i);
+                if (cloth.particles[i].IsPin) {
+                    cloth.particles[i].v.Clear();
+                }
+                else {
+                    cloth.particles[i].v += Utility.GetVector3FromVector(dv, i);
+                    cloth.particles[i].x += cloth.particles[i].v * dt;
+                }
             }
         }
         private void SetFroce0(Vector<double> f0)

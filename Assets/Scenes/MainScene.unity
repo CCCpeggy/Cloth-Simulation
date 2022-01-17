@@ -226,6 +226,8 @@ GameObject:
   m_Component:
   - component: {fileID: 793033615}
   - component: {fileID: 793033614}
+  - component: {fileID: 793033618}
+  - component: {fileID: 793033617}
   - component: {fileID: 793033616}
   m_Layer: 0
   m_Name: Cloth
@@ -246,8 +248,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3f59f41fea24da4a8cf9c93827afd5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  eps: 0.5
-  iMax: 30
 --- !u!4 &793033615
 Transform:
   m_ObjectHideFlags: 0
@@ -269,6 +269,18 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 793033613}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b4e36ceabd18ad4b9858f58af77e27c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &793033617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 793033613}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80b72fff1368d97489a2915f09385752, type: 3}
@@ -276,6 +288,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   clothShader: {fileID: 7200000, guid: e521c9887fedf834ea0525ca1f328d3e, type: 3}
   shader: {fileID: 4800000, guid: 6c120819f3082fe4e8d28e7425fcfd6c, type: 3}
+--- !u!114 &793033618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 793033613}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce44fe920dd844f4b897a94e2a21ce1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -377,7 +401,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!135 &2030197542
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -448,7 +472,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2030197541}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.4, y: -25, z: 0}
+  m_LocalPosition: {x: 8.4, y: -15, z: 5}
   m_LocalScale: {x: 7.8, y: 7.8, z: 7.8}
   m_Children: []
   m_Father: {fileID: 0}

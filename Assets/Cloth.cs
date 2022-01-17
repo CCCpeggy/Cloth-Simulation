@@ -6,12 +6,13 @@ using MathNet.Numerics.LinearAlgebra;
 
 namespace Partical
 {
+    // 這是展示一個使用 Implicit彈簧，會連接兩個點，並儲存對應的參數
+    // 彈簧特性可以參考這個影片：https://www.youtube.com/watch?v=kyQP4t_wOGI&t=531s&ab_channel=Gonkee
     public class Cloth : MonoBehaviour
     {
-        public int numberOfParticleInOneSide = 10;
+        public int numberOfParticleInOneSide = 6;
         public float particleDistance = 2;
         public int nParticles;
-        public double speed = 1;
         public int nSprings;
         public List<ClothParticle> particles = new List<ClothParticle>();
         public List<ClothSpring> springs = new List<ClothSpring>();
@@ -22,23 +23,24 @@ namespace Partical
                 pos[0] = 0;
                 for (int j = 0; j < numberOfParticleInOneSide; j++) {
                     GameObject point = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                    // GameObject point = new GameObject();
-                    point.name = String.Format("point{0}", i);
+                    int pointIdx = i * numberOfParticleInOneSide + j;
+                    point.name = String.Format("point{0}", pointIdx);
                     point.transform.parent = transform;
+                    point.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Standard"));
                     ClothParticle particle = point.AddComponent<ClothParticle>();
-                    particle.index = i * numberOfParticleInOneSide + j;
+                    particle.index = pointIdx;
                     particles.Add(particle);
                     pos.CopyTo(particle.x);
                     pos[0] += particleDistance;
                     nParticles++;
                 }
-                pos[1] += particleDistance;
-                pos[2] += particleDistance * 0.05;
+                pos[1] -= particleDistance;
+                // pos[2] += particleDistance * 0.05;
             }
             // 水平第一排固定
-            // for (int i = 0; i < numberOfParticleInOneSide; i++) {
-            //     particles[i].IsPin = true;
-            // }
+            for (int i = 0; i < numberOfParticleInOneSide; i++) {
+                particles[i].IsPin = true;
+            }
             // 固定左上右上
             particles[0].IsPin = true;
             particles[numberOfParticleInOneSide - 1].IsPin = true;
@@ -80,7 +82,7 @@ namespace Partical
             }
         }
         public void Update() {
-            double dt = Time.deltaTime * speed;
+            // double dt = Time.deltaTime;
             // 清除鎖定位置的速度
             // for (int i = 0; i < nParticles; i++) {
             //     if (particles[i].IsPin)
@@ -102,18 +104,18 @@ namespace Partical
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
             spring.Setup(particles[i], particles[j], particleDistance);
-            spring.ks = 100;
-            spring.kd = 1;
+            spring.ks = 20;
+            spring.kd = 0.2;
             springs.Add(spring);
             nSprings++;
         }
-        double sqrt = Math.Sqrt(2);
+        double sqrt_2 = Math.Sqrt(2);
         void AddSheerSpring(int i, int j) {
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
-            spring.Setup(particles[i], particles[j], particleDistance * sqrt);
-            spring.ks = 100;
-            spring.kd = 1;
+            spring.Setup(particles[i], particles[j], particleDistance * sqrt_2);
+            spring.ks = 10;
+            spring.kd = 0.2;
             springs.Add(spring);
             nSprings++;
         }
@@ -121,8 +123,8 @@ namespace Partical
             ClothSpring spring = new GameObject().AddComponent<ClothSpring>();
             spring.transform.parent = particles[i].transform;
             spring.Setup(particles[i], particles[j], particleDistance * 2);
-            spring.ks = 100;
-            spring.kd = 1;
+            spring.ks = 10;
+            spring.kd = 0.2;
             springs.Add(spring);
             nSprings++;
         }
