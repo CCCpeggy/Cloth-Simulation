@@ -17,6 +17,7 @@ namespace Partical
     public class ExplicitEulerGPU : MonoBehaviour
     {
         public ComputeShader clothShader;   // 計算的 shader
+        public GameObject Sphere;           // 可碰撞的球
         private Cloth cloth;
         private ComputeBuffer xBuffer, vBuffer, fBuffer, pinBuffer, springBuffer, colorBuffer;  // GPU data buffer
         ComputeSpring[] computeSpring;      // 彈簧
@@ -34,16 +35,10 @@ namespace Partical
             if (x == null) {
                 InitComputeShaderData();
             }
-            UpdateDt(Time.deltaTime);
-        }
-
-        void UpdateDt(float dt) {
-            // x = cloth.particles.Select(x => Utility.ConvertToVector3(x.x)).ToArray();
-            // xBuffer.SetData(x);
-            // v = cloth.particles.Select(x => Utility.ConvertToVector3(x.v)).ToArray();
-            // vBuffer.SetData(v);
-            // Euler
-            clothShader.SetFloat("dt", dt);
+            x = cloth.particles.Select(x => Utility.ConvertToVector3(x.x)).ToArray();
+            xBuffer.SetData(x);
+            clothShader.SetFloat("dt", Time.deltaTime);
+            clothShader.SetVector("spherePos", Sphere.transform.position);
             // 計算力
             clothShader.Dispatch(forceKernel, cloth.nParticles / 256 + 1, 1, 1);
             // 計算位移
@@ -57,44 +52,6 @@ namespace Partical
                 Utility.CreateVector3d(x[i].x, x[i].y, x[i].z).CopyTo(cloth.particles[i].x);
                 cloth.particles[i].gameObject.GetComponent<MeshRenderer>().material.color = new Color(color[i][0], color[i][1], color[i][2]);
             }
-
-            // Vector3[] tmpX = new Vector3[cloth.nParticles];
-            // clothShader.SetFloat("dt", dt);
-            // clothShader.Dispatch(forceKernel, cloth.nParticles / 256 + 1, 1, 1);
-            // clothShader.Dispatch(positionKernel, cloth.nParticles / 256 + 1, 1, 1);
-            // xBuffer.GetData(x);
-            // for (int i = 0; i < cloth.nParticles; i++)
-            // {
-            //     tmpX[i] += x[i] / 6;
-            // }
-            // clothShader.SetFloat("dt", dt / 2);
-            // clothShader.Dispatch(forceKernel, cloth.nParticles / 256 + 1, 1, 1);
-            // clothShader.Dispatch(positionKernel, cloth.nParticles / 256 + 1, 1, 1);
-            // xBuffer.GetData(x);
-            // for (int i = 0; i < cloth.nParticles; i++)
-            // {
-            //     tmpX[i] += x[i] / 3;
-            // }
-            // clothShader.SetFloat("dt", dt / 2);
-            // clothShader.Dispatch(forceKernel, cloth.nParticles / 256 + 1, 1, 1);
-            // clothShader.Dispatch(positionKernel, cloth.nParticles / 256 + 1, 1, 1);
-            // xBuffer.GetData(x);
-            // for (int i = 0; i < cloth.nParticles; i++)
-            // {
-            //     tmpX[i] += x[i] / 3;
-            // }
-            // clothShader.SetFloat("dt", dt);
-            // clothShader.Dispatch(forceKernel, cloth.nParticles / 256 + 1, 1, 1);
-            // clothShader.Dispatch(positionKernel, cloth.nParticles / 256 + 1, 1, 1);
-            // xBuffer.GetData(x);
-            // for (int i = 0; i < cloth.nParticles; i++)
-            // {
-            //     tmpX[i] += x[i] / 6;
-            // }
-            // for (int i = 0; i < cloth.nParticles; i++)
-            // {
-            //     Utility.CreateVector3d(tmpX[i].x, tmpX[i].y, tmpX[i].z).CopyTo(cloth.particles[i].x);
-            // }
         }
 
         // 初始化 Compute Shader 的資料
@@ -146,9 +103,9 @@ namespace Partical
             clothShader.SetBuffer(positionKernel, "v", vBuffer);
             clothShader.SetBuffer(positionKernel, "f", fBuffer);
 
-            // clothShader.SetInt("dim", cloth.numberOfParticleInOneSide);
             clothShader.SetInt("nParticals", cloth.nParticles);
             clothShader.SetInt("nSprings", cloth.nSprings);
+            clothShader.SetVector("lastSpherePos", Sphere.transform.position);
         }
 
         // 釋放 Buffer 的資料

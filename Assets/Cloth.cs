@@ -10,8 +10,8 @@ namespace Partical
     // 彈簧特性可以參考這個影片：https://www.youtube.com/watch?v=kyQP4t_wOGI&t=531s&ab_channel=Gonkee
     public class Cloth : MonoBehaviour
     {
-        public int numberOfParticleInOneSide = 6;
-        public float particleDistance = 2;
+        public int numberOfParticleInOneSide = 10;
+        public float particleDistance = 1;
         public int nParticles;
         public int nSprings;
         public List<ClothParticle> particles = new List<ClothParticle>();

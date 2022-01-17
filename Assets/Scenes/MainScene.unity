@@ -287,7 +287,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clothShader: {fileID: 7200000, guid: e521c9887fedf834ea0525ca1f328d3e, type: 3}
-  shader: {fileID: 4800000, guid: 6c120819f3082fe4e8d28e7425fcfd6c, type: 3}
+  Sphere: {fileID: 2030197541}
 --- !u!114 &793033618
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -401,7 +401,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!135 &2030197542
 SphereCollider:
   m_ObjectHideFlags: 0

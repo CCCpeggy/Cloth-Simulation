@@ -4,8 +4,6 @@
 
 #define EPSILON 0.001
 
-
-
 //
 // TYPES
 //
@@ -29,34 +27,9 @@ struct Hit {
 	float3 hitPoint,  hitNormal;
 };
 
-
-//
-// UTILITY METHODS
-//
-
-float3 HitPoint(Ray r, SphereCollider s) {
-	// If the ray is sufficiently short, just return the midpoint.
-	if (length(r.direction) < EPSILON) {
-		return r.origin +r.direction/2.0;
-	}
-	float3 P = r.origin;
-	float3 C = s.center;
-	float R = s.radius;
-	float3 d = r.direction;
-
-	float a = dot(d, (P - C));
-	float b = a * a - dot(P - C, P - C) + R * R;
-	if(b < 0) return float3 (0, 0, 0);
-	float t = (-a - sqrt(b)) / length(r.direction) / length(r.direction) ;
-	return r.origin + t*normalize(r.direction);
-	// return r.origin + (dot(p - r.origin, r.direction) / length(r.direction));
-}
-
 float3 Reflect(float3 original, float3 normal) {
 	return original - 2.0*dot(original, normal)*normal;
 }
-
-
 
 //
 // COLLISIONS
@@ -69,6 +42,7 @@ Hit RaySphereCollision(Ray r, SphereCollider s) {
 	h.hitPoint = float3(0,0,0);
 	h.hitNormal = float3(0,1,0);
 
+	// 計算 line 與 sphere 是否碰撞
 	float3 P = r.origin;
 	float3 C = s.center;
 	float R = s.radius;
@@ -89,6 +63,7 @@ Hit RaySphereCollision(Ray r, SphereCollider s) {
 
     float discriminant = s.radius - distance2;
 	discriminant = sqrt(discriminant);
+	// 兩個解
 	float t0 = projoc - discriminant;
 	float t1 = projoc + discriminant;
 	float t;
@@ -103,18 +78,9 @@ Hit RaySphereCollision(Ray r, SphereCollider s) {
 	}
 	float3 hitPoint = P + t * d;
 
-	
 	h.collision = true;
 	h.hitNormal = normalize(hitPoint - C);
 	h.hitPoint = hitPoint + h.hitNormal * 0.01;
 
-	return h;
-}
-
-Hit RayBoxCollision(Ray r, BoxCollider b) {
-	Hit h;
-	h.collision = false;
-	h.hitPoint = float3(0, 0, 0);
-	h.hitNormal = h.hitPoint * h.hitNormal;
 	return h;
 }
