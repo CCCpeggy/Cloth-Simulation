@@ -28,11 +28,11 @@ namespace Partical
             {
                 f0 = Utility.CreateVectord3n(cloth.nParticles);
                 M = Utility.CreateMatrixd3nx3n(cloth.nParticles, true);
-                SetMassMatrix(M);
                 dv = Utility.CreateVectord3n(cloth.nParticles);
                 x = Utility.CreateVectord3n(cloth.nParticles);
                 v = Utility.CreateVectord3n(cloth.nParticles);
             }
+            SetMassMatrix(M);
             const double n1_6 = 1.0 / 6;
             double dt = Time.deltaTime;
 

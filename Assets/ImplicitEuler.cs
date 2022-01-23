@@ -17,7 +17,8 @@ namespace Partical {
         private Vector<double> f0;
         private Vector<double> dfDxMultiplyV;
         private Vector<double> g = Utility.CreateVector3d(0, -9.8, 0);
-        void Start()
+
+        private void Start()
         {
             cloth = gameObject.AddComponent<Cloth>();
         }

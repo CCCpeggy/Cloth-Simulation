@@ -14,6 +14,9 @@ namespace Partical {
         private Vector<double> g = Utility.CreateVector3d(0, -9.8, 0);
         private Matrix<double> M;
         private Vector<double> f0;
+
+
+
         void Start()
         {
             cloth = gameObject.AddComponent<Cloth>();
@@ -25,8 +28,9 @@ namespace Partical {
                 // 初始化參數
                 f0 = Utility.CreateVectord3n(cloth.nParticles);
                 M = Utility.CreateMatrixd3nx3n(cloth.nParticles, true);
-                SetMassMatrix(M);
+                
             }
+            SetMassMatrix(M);
             // 計算當下的力
             double dt = Time.deltaTime;
             for (int i = 0; i < cloth.nParticles; i++) {

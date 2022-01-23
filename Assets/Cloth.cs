@@ -3,17 +3,34 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MathNet.Numerics.LinearAlgebra;
+using UnityEngine.UI;
 
 namespace Partical
 {
     // 這是展示一個使用 Implicit彈簧，會連接兩個點，並儲存對應的參數
     // 彈簧特性可以參考這個影片：https://www.youtube.com/watch?v=kyQP4t_wOGI&t=531s&ab_channel=Gonkee
     public class Cloth : MonoBehaviour
-    {
-        public int numberOfParticleInOneSide = 10;
+    {        
+        public int numberOfParticleInOneSide = (int)UIControl.num;
         public float particleDistance = 1;
         public int nParticles;
         public int nSprings;
+        private double m = 1;
+        public double M
+        {
+            get
+            {
+                return m;
+            }
+            set
+            {
+                for (int i = 0; i < nParticles; i++)
+                {
+                    particles[i].m = value;
+                }
+            }
+        }
+
         public List<ClothParticle> particles = new List<ClothParticle>();
         public List<ClothSpring> springs = new List<ClothSpring>();
         void Start()
@@ -29,13 +46,14 @@ namespace Partical
                     point.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Standard"));
                     ClothParticle particle = point.AddComponent<ClothParticle>();
                     particle.index = pointIdx;
+                    particle.m = m;
                     particles.Add(particle);
                     pos.CopyTo(particle.x);
                     pos[0] += particleDistance;
                     nParticles++;
                 }
-                pos[1] -= particleDistance;
-                // pos[2] += particleDistance * 0.05;
+                pos[1] += particleDistance;
+                pos[2] += particleDistance * 0.05;
             }
             // 水平第一排固定
             for (int i = 0; i < numberOfParticleInOneSide; i++) {
