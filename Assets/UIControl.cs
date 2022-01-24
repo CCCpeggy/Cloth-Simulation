@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class UIControl : MonoBehaviour
 {
@@ -18,15 +19,17 @@ public class UIControl : MonoBehaviour
     GameObject cloth;
     public GameObject GPU;
     public GameObject MassBar;
+    public TMP_Text MassText;
     public GameObject ParticleBar;
+    public TMP_Text ParticleText;
     static public int num = 10;
     Integrator integrator;
 
     private void Start()
     {
-        Debug.Log(num);
+        MassText.GetComponent<TMP_Text>().text = MassBar.GetComponent<Slider>().value.ToString();
         num = (int)ParticleBar.GetComponent<Slider>().value;
-        Debug.Log(num);
+        ParticleText.GetComponent<TMP_Text>().text = ParticleBar.GetComponent<Slider>().value.ToString();
     }
 
     public void ImplicitEulerClick()
@@ -79,6 +82,7 @@ public class UIControl : MonoBehaviour
     public void MassChange() 
     {
         cloth.GetComponent<Partical.Cloth>().M = MassBar.GetComponent<Slider>().value;
+        MassText.GetComponent<TMP_Text>().text = MassBar.GetComponent<Slider>().value.ToString();
     }
 
     public void ParticlesChange()
@@ -109,5 +113,7 @@ public class UIControl : MonoBehaviour
                 cloth.AddComponent<Partical.ExplicitEulerGPU>();
                 break;
         }
+
+        ParticleText.GetComponent<TMP_Text>().text = ParticleBar.GetComponent<Slider>().value.ToString();
     }
 }

@@ -4,16 +4,18 @@ using UnityEngine;
 using MathNet.Numerics.LinearAlgebra;
 
 
-namespace Partical {
-    // 這是實作 Explicit Euler 的做法
-    // 彈簧特性可以參考這個影片：https://www.youtube.com/watch?v=kyQP4t_wOGI&t=531s&ab_channel=Gonkee
-    // 跟這個網站：https://www.khanacademy.org/computing/pixar/simulation/hair-simulation-101/v/sim2-fix
-    public class ExplicitEuler : MonoBehaviour
+namespace Partical
+{
+    // 這是實作 Verlet 的做法
+    // 公式：https://www.algorithm-archive.org/contents/verlet_integration/verlet_integration.html
+    public class Verlet : MonoBehaviour
     {
         private Cloth cloth;
         private Vector<double> g = Utility.CreateVector3d(0, -9.8, 0);
         private Matrix<double> M;
         private Vector<double> f0;
+        private Vector<double> pre_pos;
+        private double acc = -100;
 
         void Start()
         {
@@ -25,12 +27,17 @@ namespace Partical {
             if (f0 == null) {
                 // 初始化參數
                 f0 = Utility.CreateVectord3n(cloth.nParticles);
-                M = Utility.CreateMatrixd3nx3n(cloth.nParticles, true);
-                
+                M = Utility.CreateMatrixd3nx3n(cloth.nParticles, true); 
+                pre_pos = Utility.CreateVectord3n(cloth.nParticles);
             }
             SetMassMatrix(M);
+
+            for (int i = 0; i < cloth.nParticles; ++i)
+                Utility.PutVector3IntoVector(pre_pos, i, cloth.particles[i].x);
+
             // 計算當下的力
             double dt = Time.deltaTime;
+
             for (int i = 0; i < cloth.nParticles; i++) {
                 cloth.particles[i].F = g;
             }
@@ -54,15 +61,18 @@ namespace Partical {
                 }
             }
             SetFroce0(f0);
-            Vector<double> dv = M.Inverse() * f0 * dt;
+            //Vector<double> dv = M.Inverse() * f0 * dt;
             // 更新速度及位置
             for (int i = 0; i < cloth.nParticles; i++) {
                 if (cloth.particles[i].IsPin) {
                     cloth.particles[i].v.Clear();
                 }
                 else {
-                    cloth.particles[i].v += Utility.GetVector3FromVector(dv, i);
-                    cloth.particles[i].x += cloth.particles[i].v * dt;
+                    //cloth.particles[i].v += dt * acc;
+                    Vector<double> tmp_pos = Utility.GetVector3FromVector(pre_pos, i);
+                    cloth.particles[i].x = cloth.particles[i].x * 2 - Utility.GetVector3FromVector(pre_pos, i) + acc * dt * dt;
+                    cloth.particles[i].v = (cloth.particles[i].x - tmp_pos) / dt;
+                    Utility.SetVector3FromVector(pre_pos, tmp_pos, i);
                 }
             }
         }

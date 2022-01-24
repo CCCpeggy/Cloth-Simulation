@@ -94,5 +94,12 @@ namespace Partical
         {
             return new Vector3((float)v[0], (float)v[1], (float)v[2]);
         }
+
+        public static void SetVector3FromVector(Vector<double> t,Vector<double> v, int i)
+        {
+            t[i * 3] = v[0];
+            t[i * 3 + 1] = v[1];
+            t[i * 3 + 2] = v[2];
+        }
     }
 }

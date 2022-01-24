@@ -8,7 +8,7 @@ namespace Partical {
     // 這是實作 Explicit Euler 的做法
     // 彈簧特性可以參考這個影片：https://www.youtube.com/watch?v=kyQP4t_wOGI&t=531s&ab_channel=Gonkee
     // 跟這個網站：https://www.khanacademy.org/computing/pixar/simulation/hair-simulation-101/v/sim2-fix
-    public class ExplicitEuler : MonoBehaviour
+    public class Leapfrog : MonoBehaviour
     {
         private Cloth cloth;
         private Vector<double> g = Utility.CreateVector3d(0, -9.8, 0);
